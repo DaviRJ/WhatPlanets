@@ -1,77 +1,81 @@
-import React, { Component } from 'react';
-import axios from 'axios';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { insertPlanet } from "../reducers/actions";
+import axios from "axios";
 
-import Config from '../configs/config';
-import Loading from '../assets/Loading';
-import Front from './Front';
+import Config from "../configs/config";
+import Loading from "../assets/Loading";
+import Front from "./Front";
 
-class Window extends Component{
-    constructor(props){
+class Window extends Component {
+    constructor(props) {
         super(props);
 
         this.state = {
             loading: true,
-            data: {},
-            filmNames: []
+            actualPlanet: 0,
+            totalPlanets: Config.MAX_PLANETS_API
+        };
+    }
+
+    fetchPlanets = async () => {
+        let promissesArray = [];
+        let urlsToCall = [];
+
+        //Mount de requests URLs
+        for (let i = 1; i <= Config.MAX_PLANETS_API; i++) {
+            urlsToCall.push(
+                `${Config.BASE_API_URL + Config.PLANETS_API_URL}${i}`
+            );
         }
 
-        this.nextPlanet = this.nextPlanet.bind(this);
-    }
-    
-    componentDidMount(){
-        this.nextPlanet();
+        //Making the requests and storing in promisses array
+        urlsToCall.map(url => promissesArray.push(axios.get(url)));
+
+        try {
+            const result = await axios.all(promissesArray);
+            this.props.insertPlanet(result.map(({ data }) => data));
+            this.setState({ loading: false });
+        } catch (error) {
+            console.log("Oops, something went wrong: " + error.message);
+        }
+    };
+
+    componentDidMount() {
+        this.fetchPlanets();
     }
 
-    nextPlanet(){
+    nextPlanet = () => {
         this.setState({
-            loading: true
-        })
-        
-        //Escolhe um planeta aleatório
-        let planet = Math.floor(Math.random() * Config.MAX_PLANETS_API) + 1;
-
-        axios.get(Config.BASE_API_URL + Config.PLANETS_API_URL + planet).then(resp => {
-            //let status = resp.status;
-            let data = resp.data;
-            
-            this.setState({
-                data: data                
-            })
-
-            this.getFilmsInformation();
-
-        }).catch(err => {
-            console.log("Oops, something went wrong: "+err.message)
+            actualPlanet:
+                this.state.actualPlanet === Config.MAX_PLANETS_API - 1
+                    ? 0
+                    : this.state.actualPlanet + 1
         });
-    }
-    
-    getFilmsInformation = async () => {
-        let urlFims = this.state.data.films;
+    };
 
-        const promiseArray = urlFims.map(url=>axios.get(url));
-  
-        try {        
-            const filmsNames = (
-                await Promise.all(promiseArray)
-            ).map( res=>res.data.title )
-
-            this.setState({
-                filmNames: filmsNames,
-                loading: false
-            })
-        } catch(error) {
-            console.log("Oops, something went wrong: "+error.message)
-        }
-    }
-
-    render(){
-        return(
-
-            this.state.loading ? 
-            
-            <Loading /> : <Front data={this.state.data} next={this.nextPlanet} films={this.state.filmNames} />
+    render() {
+        return this.state.loading ? (
+            <Loading />
+        ) : (
+            <Front
+                data={this.props.planets[this.state.actualPlanet]}
+                next={this.nextPlanet}
+                films={this.state.filmNames}
+                totalPlanets={this.state.totalPlanets}
+                actualPlanet={this.state.actualPlanet + 1}
+            />
         );
     }
 }
 
-export default Window;
+const mapStateToProps = state => ({ planets: state.planetsReducer.planets });
+
+const mapDispatchToProps = dispatch => ({
+    insertPlanet: data => dispatch(insertPlanet(data))
+});
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Window);
