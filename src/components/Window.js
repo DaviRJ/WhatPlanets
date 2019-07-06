@@ -12,9 +12,7 @@ class Window extends Component {
         super(props);
 
         this.state = {
-            loading: true,
-            actualPlanet: 0,
-            totalPlanets: Config.MAX_PLANETS_API
+            loading: true
         };
     }
 
@@ -45,27 +43,8 @@ class Window extends Component {
         this.fetchPlanets();
     }
 
-    nextPlanet = () => {
-        this.setState({
-            actualPlanet:
-                this.state.actualPlanet === Config.MAX_PLANETS_API - 1
-                    ? 0
-                    : this.state.actualPlanet + 1
-        });
-    };
-
     render() {
-        return this.state.loading ? (
-            <Loading />
-        ) : (
-            <Front
-                data={this.props.planets[this.state.actualPlanet]}
-                next={this.nextPlanet}
-                films={this.state.filmNames}
-                totalPlanets={this.state.totalPlanets}
-                actualPlanet={this.state.actualPlanet + 1}
-            />
-        );
+        return this.state.loading ? <Loading /> : <Front />;
     }
 }
 

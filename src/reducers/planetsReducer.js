@@ -2,8 +2,7 @@ import config from "../configs/config";
 
 const initialState = {
     planets: [],
-    totalPlanets: config.MAX_PLANETS_API,
-    actualPlanet: 0
+    totalPlanets: config.MAX_PLANETS_API
 };
 
 export const planetsReducer = (state = initialState, action) => {
