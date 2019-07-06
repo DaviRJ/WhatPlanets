@@ -9,7 +9,7 @@ const initialState = {
 export const planetsReducer = (state = initialState, action) => {
     switch (action.type) {
         case "INSERT_PLANET":
-            return { planets: action.data };
+            return { ...state, planets: action.data };
         default:
             return state;
     }
