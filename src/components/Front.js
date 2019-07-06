@@ -42,7 +42,6 @@ const Front = ({ planets, totalPlanets }) => {
 
 const mapStateToProps = state => ({
     planets: state.planetsReducer.planets,
-    actualPlanet: state.planetsReducer.actualPlanet,
     totalPlanets: state.planetsReducer.totalPlanets
 });
 
