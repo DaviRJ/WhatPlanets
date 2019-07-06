@@ -7,8 +7,7 @@ import Window from "./components/Window";
 const App = () => (
     <Provider store={Store}>
         <div className="Main">
-            {" "}
-            <Window />{" "}
+            <Window />
         </div>
     </Provider>
 );
